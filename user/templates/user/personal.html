@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load grav_tag %}
+{% block css %}
+
+    <style>
+        a:visited a:hover {
+            text-decoration: none;
+        }
+
+        li:active {
+            background-color: #f7f2ff;
+            text-decoration: none;
+        }
+
+        .left-box {
+            margin-top: 30px;
+            background-color: #f5f6f7;
+            border: 1px solid #a5a5a5;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .05);
+        }
+
+        .left-box li {
+            display: block;
+            font-size: 20px;
+        }
+
+        .right-content {
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .05);
+            background-color: #f5f6f7;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        {#        <h1 align="center">个人信息</h1>#}
+        <div class="row">
+            <div id="app">
+                <div class="col-md-3">
+                    <div class="left-box">
+                        <ul class="list-group">
+                            <li class="list-item">Personal Information</li>
+                            <li><a v-on:click="my_rate" href="#">My ratings</a></li>
+                            <li><a v-on:click="my_collect" href="#">My favourites</a></li>
+                            <li><a v-on:click="my_comment" href="#">My comments</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="right-content">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12">
+                                    <img class="img-responsive img-circle" src='{{ user.email|gravatar:"150" }}'>
+                                </div>
+                                <div class="col-md-8 col-sm-12">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h2>
+                                                User Name: {{ user.username }}
+                                            </h2>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <h2>
+                                            Mailbox: {{ user.email }}
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% verbatim myblock %}
+                            <div id="table_app">
+                                <table class="table" style="margin-top: 10px">
+                                    <thead>
+                                    <tr>
+                                        <th v-for="(value,index) in tables[0]"> {{ index }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tr v-for="table in tables">
+                                        <td v-for="(value,index) in table">{{ value }}</td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                        {% endverbatim myblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block rightside %}
+{% endblock %}
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                tables: [],
+            },
+            methods: {
+                my_rate: function () {
+                    axios.get('/api/rate/{{ user.id }}').then(function (res) {
+                        app.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                ,
+                my_collect: function () {
+                    axios.get('/api/collect/{{ user.id }}').then(function (res) {
+                        app.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                ,
+                my_comment: function () {
+                    axios.get('/api/comment/{{ user.id }}').then(function (res) {
+                        app.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+            }
+        })
+    </script>
+{% endblock %}
+

@@ -1,0 +1,21 @@
+{% extends "user/base_show.html" %}
+{% block th_name %}
+    <th>Movie Name</th>
+    <th>Director</th>
+    <th>Tag</th>
+    <th>View</th>
+{% endblock %}
+{% block th_value %}
+    <td><a href="{% url 'movie' i.id %}"> {{ i.name }}</a></td>
+    <td><a href="{% url 'director_movie' i.director %}">{{ i.director }}</a></td>
+    <td> {% if i.tags.all %}
+        {% for tag in i.tags.all %}
+            <a href="{% url 'one_tag' tag.id %}">{{ tag }}</a>
+        {% endfor %}
+    {% else %}
+        Nothing
+    {% endif %}
+    </td>
+    <td><a class="btn btn-success" href="{% url 'movie' i.id %}">View</a></td>
+{% endblock %}
+

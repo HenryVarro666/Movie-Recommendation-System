@@ -1,0 +1,248 @@
+<!DOCTYPE HTML>
+<html lang="zh">
+{% load static %}
+<head>
+    <title>Movie Recommender System</title>
+    <link href="{% static 'css/bootstrap.css' %} " rel='stylesheet' type='text/css'/>
+    <link href="{% static 'css/owl.carousel.css' %} " rel='stylesheet' type='text/css'/>
+    <link href="{% static 'css/style.css' %} " rel='stylesheet' type='text/css'/>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    {#    <link href="{% static 'js/style.css' %} " rel='stylesheet' type='text/css' />#}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <!-- Custom Theme files -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    {% block css %}
+    {% endblock %}
+</head>
+<body>
+<!-- container -->
+<div class="header">
+    <div class="container">
+        <!-- header -->
+        <!-- top-nav -->
+        <div class="top-nav">
+            <span class="menu">
+</span>
+            <ul>
+                <li class="active"><a href="{% url 'index' %}">Home Page</a></li>
+                <li><a href="{% url 'all_tags' %}">Tag</a></li>
+                <li><a href="/admin">Back Office Management</a></li>
+                {% if request.session.login_in == True %}
+                    <li><a href="{% url 'personal' %}">{{ request.session.name }}</a></li>
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'register' %}">Register</a></li>
+                {% endif %}
+                <div class="clearfix">
+                </div>
+            </ul>
+        </div>
+        <div class="clearfix">
+            <h2><a href="/">Movie Recommender System</a></h2>
+
+        </div>
+        <!-- top-nav -->
+        <!-- script-for-menu -->
+        <script>
+            $(document).ready(function () {
+                $("span.menu").click(function () {
+                    $(".top-nav ul").slideToggle(200);
+                });
+            });
+        </script>
+        <!-- script-for-menu -->
+    </div>
+    <!-- header -->
+</div>
+
+<!-- banner -->
+{#            <div class="banner">#}
+{#    <!-- slider -->#}
+{#    <!--- img-slider --->#}
+{#    <div class="img-slider">#}
+{#        <!----start-slider-script---->#}
+{#        <script src="{% static 'js/responsiveslides.min.js' %}"></script>#}
+{#        <script>#}
+{#            // You can also use "$(window).load(function() {"#}
+{#            $(function () {#}
+{#                // Slideshow 4#}
+{#                $("#slider4").responsiveSlides({#}
+{#                    auto: true,#}
+{#                    pager: true,#}
+{#                    nav: true,#}
+{#                    speed: 500,#}
+{#                    namespace: "callbacks",#}
+{#                    before: function () {#}
+{#                        $('.events').append("<li>before event fired.</li>");#}
+{#                    },#}
+{#                    after: function () {#}
+{#                        $('.events').append("<li>after event fired.</li>");#}
+{#                    }#}
+{#                });#}
+{##}
+{#            });#}
+{#        </script>#}
+{#        <!----//End-slider-script---->#}
+{#        <!-- Slideshow 4 -->#}
+{#        <div id="top" class="callbacks_container">#}
+{#            <ul class="rslides" id="slider4">#}
+{#                <li>#}
+{#                    <img class="img-responsive" src="{% static 'images/1.jpg' %}" alt="">#}
+{#                    <div class="slider-caption">#}
+{#                        <div class="slider-caption-inner">#}
+{#                            <h1>电影推荐系统</h1>#}
+{#                            <h2>Movie Recommendation System</h2>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </li>#}
+{#                <li>#}
+{#                    <img src="{% static 'images/2.jpg' %}" alt="">#}
+{#                    <div class="slider-caption">#}
+{#                        <div class="slider-caption-inner">#}
+{#                            <h1>电影推荐系统</h1>#}
+{#                            <h2>Movie Recommendation System</h2>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </li>#}
+{#                <li>#}
+{#                    <img src="{% static 'images/3.jpg' %}" alt="">#}
+{#                    <div class="slider-caption">#}
+{#                        <div class="slider-caption-inner">#}
+{#                            <h1>电影推荐系统</h1>#}
+{#                            <h2>Movie Recommendation System</h2>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </li>#}
+{#            </ul>#}
+{#        </div>#}
+{#        <div class="clearfix"></div>#}
+{#    </div>#}
+{#    <!-- slider -->#}
+{#</div>#}
+<!-- banner -->
+<!-- categories -->
+<!---->
+{% block cate %}
+{% endblock %}
+<!-- categories -->
+
+<!-- content -->
+<div class="content">
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+        {% block rightside %}
+            <div class="col-md-4 content-right">
+                <div class="recent-add">
+                    <!----sreen-gallery-cursual---->
+                    <div class="sreen-gallery-cursual">
+                        <!-- requried-jsfiles-for owl -->
+                        <link href="{% static 'css/owl.carousel.css' %}" rel="stylesheet">
+                        <script src="{% static 'js/owl.carousel.js' %}"></script>
+                        <div id="app2">
+                            <!-- //requried-jsfiles-for owl -->
+                            <!-- start content_slider -->
+                            {% verbatim app2 %}
+                                <div id="owl-demo" class="owl-carousel text-center">
+                                    <div class="item" v-for="movie in movies">
+                                        <img class="lazyOwl" v-bind:src="movie.image_link" alt="name">
+                                    </div>
+                                </div>
+                            {% endverbatim app2 %}
+                        </div>
+                        <!--//sreen-gallery-cursual---->
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <!-- 基于用户的推荐 -->
+                {% verbatim app %}
+                    <div class="popular-albums" id="app">
+                        <h2>User-based recommendations</h2>
+                        <div class="popular-allbum" v-for="movie in movies.slice(0,5)">
+                            <div class="popular-allbum-pic">
+                                <a v-bind:href="'/movie/'+movie.id">
+                                    <img v-bind:src="movie.image_link" title="movie.name"/>
+                                </a>
+                            </div>
+                            <div class="popular-allbum-info">
+                                <h3><a v-bind:href="'/movie/'+movie.id">{{ movie.name }}</a></h3>
+                                <p><strong>Release Time:</strong>{{ movie.years }}</p>
+                                <p><strong> Director:</strong>{{ movie.director }} </p>
+                                <p><strong> Douban rating:</strong>{{ movie.d_rate }} </p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                {% endverbatim app %}
+                <!-- popular-allbums -->
+                <!-- content-right -->
+            </div>
+        {% endblock %}
+    </div>
+</div>
+<!-- content -->
+<!-- content-right -->
+<script src="{% static '/js/vue.js' %}"></script>
+<script src="{% static '/js/axios.min.js' %}"></script>
+    <script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            movies: [],
+            name: 'app',
+        },
+        created() {
+            this.get_user_recommend();
+        },
+        methods: {
+            get_user_recommend: function () {
+                {#console.log("{{ request.session.user_id }}");#}
+                axios.get('/api/user_recommend/{{ request.session.user_id}}').then(function (res) {
+                    app.movies = res.data;
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+        }
+    });
+    var app2 = new Vue({
+        el: '#app2',
+        data: {
+            movies: []
+        },
+        updated: function () {
+            this.load_css();
+        },
+        methods: {
+            load_css: function () {
+                $("#owl-demo").owlCarousel({
+                    items: 3,
+                    lazyLoad: true,
+                    autoPlay: true,
+                    navigation: true,
+                    navigationText: false,
+                    pagination: true,
+                });
+            }
+        },
+        created: function () {
+            axios.get('/api/hotest_movie').then(function (res) {
+                app2.movies = res.data;
+            }).catch(function (error) {
+                console.log(error);
+            });
+        },
+    });
+</script>
+{% block js %}
+{% endblock %}
+<!-- footer -->
+<div class="footer">
+</div>
+<!-- footer -->
+<!-- container -->
+</body>
+</html>
+

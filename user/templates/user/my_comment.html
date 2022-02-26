@@ -1,0 +1,17 @@
+{% extends "user/base_show.html" %}
+{% block th_name %}
+    <th>Movie Name</th>
+    <th>Comment</th>
+    <th>Comment Time</th>
+    <th>Delete</th>
+{% endblock %}
+{% block modal %}
+    <a class="btn btn-primary" href="{% url 'delete_comment' i.id %}">Confirm</a>
+
+{% endblock %}
+{% block th_value %}
+    <td>{{ i.movie.name }}</td>
+    <td>{{ i.content }}</td>
+    <td>{{ i.create_time }}</td>
+    <td><a class="btn btn-danger" data-toggle="modal" data-target="#confirm-modal-{{ i.id }}">Delete</a></td>
+{% endblock %}

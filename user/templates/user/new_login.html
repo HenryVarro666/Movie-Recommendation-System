@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="zh" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Login</title>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="application/x-javascript"> addEventListener("load", function () {
+        setTimeout(hideURLbar, 0);
+    }, false);
+
+    function hideURLbar() {
+        window.scrollTo(0, 1);
+    } </script>
+    <meta name="keywords"
+          content="Flat Dark Web Login Form Responsive Templates, Iphone Widget Template, Smartphone login forms,Login form, Widget Template, Responsive Templates, a Ipad 404 Templates, Flat Responsive Templates"/>
+    <link href="{% static '/css/style-login.css' %}" rel='stylesheet' type='text/css'/>
+    <script type="text/javascript" src="{% static 'js/jquery-login.min.js' %}"></script>
+
+</head>
+<body>
+<script>$(document).ready(function (c) {
+    $('.close').on('click', function (c) {
+        $('.login-form').fadeOut('slow', function (c) {
+            $('.login-form').remove();
+        });
+    });
+});
+</script>
+
+<h1>登录</h1>
+<div class="login-form">
+
+    <div class="head-info">
+        <label class="lbl-1"> </label>
+        <label class="lbl-2"> </label>
+        <label class="lbl-3"> </label>
+    </div>
+    <div class="clear"></div>
+    <div class="avtar"><img src="{% static 'images/avtar.png' %}"/></div>
+
+    <form action="{% url 'login' %}" method='post' autocomplete="on">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field.errors }}
+                {{ field }}
+            </div>
+        {% endfor %}
+{#        <div class="row">#}
+{#            <div class="col-md-5 ">#}
+{#                <button type="reset" class="btn btn-block btn-danger">清除</button>#}
+{##}
+{#            </div>#}
+{#            <div class="col-md-5 col-md-offset-2">#}
+{#                <button type="submit" class="btn btn-block btn-success">登录</button>#}
+{##}
+{#            </div>#}
+{#        </div>#}
+        <span class=" text fa fa-mail-forward" style="color: white;font-size: 20px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No account?<a href="{% url 'register' %}">   Click here to register!</a></span>
+        <div class="signin"><input type="submit" value="Login"></div>
+    </form>
+    {#    <form>#}
+    {#		<input type="text" class="text" value="用户名" onFocus="this.value = '';" onBlur="if (this.value == '') {this.value = '用户名';}" >#}
+    {#		<div ><input type="password" value="密码" onFocus="this.value = '';" onBlur="if (this.value == '') {this.value = '密码';}"></div>#}
+    {##}
+    {#	</form>#}
+
+</div>
+</body>
+</html>

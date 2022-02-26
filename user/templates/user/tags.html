@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="col-md-8 content-left">
+        <div class="albums">
+            <h1>Tag</h1>
+        </div>
+        <div class="row">
+            {% for tag in tags %}
+                <div class="col-md-3">
+                    <a href="{% url 'index' %}?tag_id={{ tag.id }}">{{ tag.name }}</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

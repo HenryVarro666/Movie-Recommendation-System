@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="col-md-8 content-left">
+        <div class="albums">
+            <h1>Personal Information</h1>
+        </div>
+        <br>
+        <form action="{% url 'personal' %}" method='post' autocomplete="on">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field.errors }}
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <input type="submit" value="Reset" style="width: 80px; height: 30px;background-color: burlywood">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="submit" value="Modify information" style="width: 80px; height: 30px;background-color: #b6b7b9">
+        </form>
+        {% verbatim myblock %}
+
+        <div id="table_app">
+            <br> <br> <br> <br>
+            <a style="color:darkred;font-size: 20px;width: 100px; height: 50px;" v-on:click="my_collect">My Collections</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a style="color:blueviolet;font-size: 20px;width: 100px; height: 50px;" v-on:click="my_rate">My Ratings</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a style="color:peru;font-size: 20px;width: 100px; height: 50px;" v-on:click="my_comment">My Comments</a>
+            <br> <br> <br>
+            <table width="800" border="0" align="center" style="table-layout: fixed">
+                <tr align="center">
+                    <th align="center" v-for="(value,index) in tables[0]"> {{ index }}</th>
+                </tr>
+                <tr v-for="table in tables">
+                    <td v-for="(value,index) in table">{{ value }}</td>
+                </tr>
+            </table>
+        </div>
+        {% endverbatim myblock %}
+
+    </div>
+{% endblock %}
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+    <script>
+        var table_app = new Vue({
+            el: '#table_app',
+            data: {
+                tables: [],
+            },
+            methods: {
+                my_rate: function () {
+                    axios.get('/api/rate/{{ user.id }}').then(function (res) {
+                        table_app.tables = res.data;
+                        console.log(table_app.tables);
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                ,
+                my_collect: function () {
+                    axios.get('/api/collect/{{ user.id }}').then(function (res) {
+                        table_app.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                ,
+                my_comment: function () {
+                    axios.get('/api/comment/{{ user.id }}').then(function (res) {
+                        table_app.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+            }
+        })
+    </script>
+{% endblock %}
