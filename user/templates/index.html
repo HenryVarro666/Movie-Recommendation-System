@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block cate %}
+    <div class="categories">
+        <div class="container">
+            <div class="categories-left">
+                <ul class="options">
+                    <li><a href="{% url 'index' %}">All movies</a></li>
+                    <li><a href="{% url 'index' %}?order=1">Rating Sort</a></li>
+                    <li><a href="{% url 'index' %}?order=2">Collection Sort</a></li>
+                    <li><a href="{% url 'index' %}?order=3">Time Sort</a></li>
+                    <li><a href="{% url 'index' %}?order=4">Popularity Sort</a></li>
+                </ul>
+                <select class="s-option" onchange="location = this.value;">
+                    {% for tag in tags %}
+                        <option value="{% url 'index' %}?tag_id={{ tag.id }}">{{ tag.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="categories-right">
+                <form action="/search/" method="post">
+                    {% csrf_token %}
+                    <input type="text" required name="search" placeholder="Enter keywords">
+                    <input type="submit" value="Search"/>
+                </form>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+{% endblock %}
+{% block content %}
+    <!-- content-left -->
+    <div class="col-md-8 content-left">
+        {% for movie in movies %}
+            <div onclick="" class="artical">
+                <div class="col-md-4 artical-left">
+                    <a href="{% url 'movie' movie.id %}"><img src="{{ MEDIA_URL }}{{ movie.image_link }}" title="post-name"/></a>
+                </div>
+                <div class="col-md-8 artical-right">
+                    <div class="artical-head">
+                        <h2><a href="{% url 'movie' movie.id %}">{{ movie.name }}</a></h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <!-- artical-info -->
+                    <div class="artical-info">
+                        <p><strong>Release Time:</strong> {{ movie.years }}</p>
+                        <p><strong>Tag:</strong> {% for tag in movie.tags.all %}
+                            <a href="">{{ tag.name }}</a>
+                        {% endfor %}
+                        </p>
+                        <p><strong>Director:</strong> {{ movie.director }}</p>
+                        <p><strong>Douban rating:</strong>{{ movie.d_rate }} </p>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        {% endfor %}
+        <!-- artical-end -->
+        <div class="clearfix"></div>
+        <!-- pagenate -->
+        <div class="pagenate">
+            <ul>
+                {% for l in  movies.paginator.page_range %}
+                    {% if l <= movies.number|add:5 and l >= movies.number|add:-5 %}
+                        {% if movies.number == l %}
+                            <li class="page-active"><span>{{ l }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                            <li><a href="?page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if movies.has_next %}
+                    <li class="next"><a href="?page={{ movies.next_page_number }}">Next Page</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        <!-- pagenate -->
+    </div>
+
+
+{% endblock %}
+<!-- content-left -->

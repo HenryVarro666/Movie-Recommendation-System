@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="col-md-8 content-left">
+    <h2 align="center"> Select your favorite tag</h2>
+    <div class="row">
+        {% for tag in tags %}
+            <div class="col-md-2">
+                <label class="tags-input h2"><span class="label label-primary">{{ tag.name }}</span> </label>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-md-offset-3" style="margin-top: 100px">
+            <button class="btn btn-lg btn-info  btn-block"> Submit</button>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        var items = [];
+        $("label").each(function (index) {
+            let toggle = false;
+            $(this).on("click", function () {
+                console.log(toggle);
+                toggle = !toggle;
+                if (toggle === true) {
+                    items.push($(this).text());
+                    $(this).children('span').addClass('label-danger');
+
+                } else
+                //删除元素
+                {
+                    console.log("false");
+                    items.splice(items.indexOf($(this).text()), 1);
+                    $(this).children('span').removeClass('label-danger');
+                }
+                console.log(items);
+            });
+        });
+        $('button').click(function () {
+            $.ajax({
+                url: '/choose_tags/',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(items),
+                {#返回的数据类型#}
+                dataType: 'html',
+                success: function (result) {
+                    alert("The selection was successful!");
+                    var newDoc = document.open("text/html", "replace");
+                    newDoc.write(result);
+                    newDoc.close();
+                    {#$(html).html(result);#}
+                },
+                fail: function (xhr, textStatus, errorThrown) {
+                    alert('request failed');
+                },
+                error: function (jqXHR, exception) {
+                    console.log(jqXHR.status);
+                    console.log(exception);
+                }
+            });
+        })
+    </script>
+
+{% endblock %}

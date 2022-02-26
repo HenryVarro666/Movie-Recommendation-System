@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User-rated movies</title>
+    <style>
+        h2{
+            text-align: center;
+            font-family: Georgia, serif;
+            font-weight: bold
+        }
+        li{
+            list-style: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h2>Movies you've rated：</h2>
+<br/>
+{% for dd in item %}
+    <li>
+    <p>{{ dd }}</p>
+    </li>
+
+{%  endfor %}
+</body>
+</html>

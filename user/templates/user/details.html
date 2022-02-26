@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load grav_tag %}
+{% block content %}
+    <div class="col-md-8 content-left">
+        <!-- artical-single-page -->
+        <div class="artical-details">
+            <h2>{{ movie.name }} </h2>
+            <!-- artical-details-info -->
+            <div class="artical-details-info">
+                <div class="artical-details-info-left">
+                    <a href="#"><img src="{{ MEDIA_URL }}{{ movie.image_link }}" title="name"/></a>
+                </div>
+                <div class="artical-details-info-right">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Tag:</strong> {% for tag in movie.tags.all %}
+                                <a href="">{{ tag.name }}</a>
+                            {% endfor %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Realease Time:</strong> {{ movie.years }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Country:</strong> {{ movie.country }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Director:</strong> {{ movie.director }}</p>
+                        </div>
+                    </div>
+                    <p><strong>Actor:</strong> {{ movie.leader | slice:50 }}...
+                    <p><strong>Description: </strong>{{ movie.intro | slice:240 }}...</p>
+                    <p><strong>Number of Favorites：{{ movie.collect.count }}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {% if is_collect %}
+                            <a class="button" style="padding-bottom: 10px; margin-left: 10px" href="{% url 'decollect' movie.id %}">Cancel Favorites</a>
+                        {% else %}
+                            <a class="button" style="padding-bottom: 10px; margin-left: 10px" href="{% url 'collect' movie.id %}">Add to Favorites</a>{% endif %}
+                        {#                        <button>收藏</button>#}
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Douban rating：{{ movie.d_rate }}</strong>&nbsp;&nbsp;&nbsp
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if user_rate is not None %}
+                                <h4>Please rate: {{ user_rate.mark }}</h4>
+                            {% else %}
+                                <form action="{% url 'score' movie.id %}" method="post">
+                                    {% csrf_token %}
+                                    <strong class="d-inline-block" style="margin-bottom: 0; box-sizing: border-box; margin-right: 20px">Add rating
+                                        <select name="score" class="custom-select" style="width: auto">
+                                            <option>1.0</option>
+                                            <option>2.0</option>
+                                            <option>3.0</option>
+                                            <option>4.0</option>
+                                            <option>5.0</option>
+                                        </select>
+                                    </strong>
+                                    <button type="submit" class="btn-success">Submit</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <a class="download" target="_blank" href="{{ movie.douban_link }}">Go to watch (Douban Link)</a>
+                </div>
+                <div class="clearfix"></div>
+                <div class="related-articals">
+                    <h2>Item-based recommendations</h2>
+                    <!-- related-albums -->
+                    <div class="related-albums">
+                        {% verbatim item_app %}
+                            <div id="item_app">
+                                <div id="owl-demo1" class="owl-carousel text-center">
+                                    <div class="item" v-for="movie in movies.slice(0,10)">
+                                        <div class="r-album" style="height: 450px; overflow: scroll">
+                                            <div class="r-album-pic">
+                                                <a v-bind:href="'/movie/'+movie.id"><img height="270px" v-bind:src="movie.image_link" title="name"/></a>
+                                            </div>
+                                            <div class="r-album-info">
+                                                <h3><a v-bind:href="'/movie/'+movie.id">{{ movie.name }}</a></h3>
+                                                <p><strong>Release Time:</strong>{{ movie.years }}</p>
+                                                <p><strong> Director:</strong>{{ movie.director }} </p>
+                                                <p><strong> Douban rating:</strong>{{ movie.d_rate }} </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endverbatim item_app %}
+                    </div>
+                    <!-- related-albums -->
+                </div>
+                <br><br><br>
+            <div>
+                <h1 align="center">Movie Review Analysis</h1>
+                <img align="center" class="img-responsive img-rounded" src="{{ MEDIA_URL }}/comment/{{ movie.douban_id }}.jpg" alt="Comment doesn't exist.">
+            </div>
+                <div class="comment">
+                    <div lang="en-US" class="gitment-container gitment-editor-container">
+                        <form role="form" class="" action="{% url 'comment' movie.id %}" method="post">
+                            <div class="gitment-editor-main">
+                                <div class="gitment-editor-header">
+                                    <h2>Post Comments：</h2>
+                                    <br>
+                                </div>
+                                {% csrf_token %}
+                                <div class="gitment-editor-body">
+                                    <textarea class="text_area" rows="3" cols="80" name="comment" id="comment" tabindex="4" placeholder="Comment"></textarea>
+                                </div>
+                            </div>
+                            <div class="gitment-editor-footer">
+                                <br><input type="submit" name="submit" class="button" id="submit" style="background-color: #b6b7b9;width: 2cm;" value="Send"/>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div lang="en-US" class="gitment-container gitment-comments-container">
+                        <p>----------------------------------------------------------------------------------------------------------</p>
+                        <div class="gitment-editor-header">
+                            <h2>Comment：</h2>
+                            <br>
+                        </div>
+                        <div class="gitment-comments-list">
+                            {% for i in comments %}
+                                <li class="gitment-comment">
+                                    <a class="gitment-comment-avatar">
+                                        <img class="gitment-comment-avatar-img img-circle" src='{{ request.user.email|gravatar:"50" }}'>
+                                        <span class="gitment-comment-name"> {{ i.user.username }}Posted in</span><span>{{ i.create_time }} </span>
+                                    </a>
+                                    <br>
+                                    <div class="gitment-comment-body gitment-markdown"><p>{{ i.content }} </p></div>
+                                </li>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <!-- artical-details-info -->
+        </div>
+        <!-- related-articals -->
+        <!-- related-articals -->
+        <!-- artical-single-page -->
+        <div class="clearfix"></div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        var item_app = new Vue({
+            el: '#item_app',
+            data: {
+                movies: [],
+                name: 'item_app',
+            },
+            created() {
+                this.get_item_recommend();
+            },
+            updated() {
+                this.load_css();
+            },
+            methods: {
+                get_item_recommend: function () {
+                    if ("{{ request.session.user_id }}" === "") {
+                    }
+                    axios.get('/api/item_recommend/{{ request.session.user_id}}').then(function (res) {
+                        item_app.movies = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                },
+                load_css: function () {
+                    $("#owl-demo1").owlCarousel({
+                        items: 3,
+                        lazyLoad: true,
+                        autoPlay: true,
+                        navigation: true,
+                        navigationText: false,
+                        pagination: true,
+                    });
+                }
+
+            }
+        });
+    </script>
+{% endblock %}
