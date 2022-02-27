@@ -294,3 +294,8 @@ recommend_movies.py
 
     操作录屏
 
+# 参考代码
+
+https://github.com/Colaplusice/movie1_recommend
+
+https://github.com/Colaplusice/movie_recommend
