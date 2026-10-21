@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" role="img" aria-labelledby="title desc"><title id="title">MOVIE RECOMMENDATION SYSTEM</title><desc id="desc">Movies picked by people like you. A Django movie site with user- and item-based collaborative filtering.</desc><defs><linearGradient id="paper" x2="1" y2="1"><stop stop-color="#F7F9FC"/><stop offset="1" stop-color="#EFF3F7"/></linearGradient></defs><rect width="1600" height="960" fill="url(#paper)"/><g font-family="Inter, 'Segoe UI', Arial, sans-serif">
+<rect x="0" y="0" width="1600" height="9" rx="0" fill="#56688A" stroke="none"/>
+<text x="64" y="66" font-size="20" fill="#172837" font-weight="700" letter-spacing="2" data-maxx="900">MOVIE RECOMMENDATION SYSTEM</text>
+<text x="1536" y="66" font-size="16" fill="#56688A" font-weight="600" letter-spacing="1" text-anchor="end">SENIOR PROJECT / WEB + RECSYS</text>
+<text x="60" y="167" font-size="72" fill="#142638" font-weight="500" data-maxx="1540">Movies picked by people like you.</text>
+<text x="64" y="221" font-size="27" fill="#344C5F" font-weight="400" data-maxx="1536">A Django movie site with user- and item-based collaborative filtering.</text>
+<text x="64" y="262" font-size="20" fill="#697988" font-weight="400" data-maxx="1536">Ratings and reviews crawled from Douban, stored in SQLite.</text>
+<rect x="64" y="323" width="344" height="272" rx="20" fill="#FFFFFF" stroke="#DCE4EB"/>
+<rect x="88" y="349" width="44" height="5" rx="2" fill="#56688A" stroke="none"/>
+<text x="88" y="393" font-size="17" fill="#56688A" font-weight="700" letter-spacing="1.4" data-maxx="394">01 / CRAWL</text>
+<text x="88" y="441" font-size="28" fill="#172C3C" font-weight="600" data-maxx="394">Douban data</text>
+<text x="88" y="485" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="394">Movies, tags, reviews</text>
+<text x="88" y="517" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="394">Saved to CSV</text>
+<text x="88" y="549" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="394">Loaded into SQLite</text>
+<path d="M416 458h16m-6-6 6 6-6 6" fill="none" stroke="#56688A" stroke-width="2"/>
+<rect x="440" y="323" width="344" height="272" rx="20" fill="#FFFFFF" stroke="#DCE4EB"/>
+<rect x="464" y="349" width="44" height="5" rx="2" fill="#56688A" stroke="none"/>
+<text x="464" y="393" font-size="17" fill="#56688A" font-weight="700" letter-spacing="1.4" data-maxx="770">02 / RATE</text>
+<text x="464" y="441" font-size="28" fill="#172C3C" font-weight="600" data-maxx="770">User actions</text>
+<text x="464" y="485" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="770">Rate, comment, favourite</text>
+<text x="464" y="517" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="770">Search title or director</text>
+<text x="464" y="549" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="770">Browse by tag</text>
+<path d="M792 458h16m-6-6 6 6-6 6" fill="none" stroke="#56688A" stroke-width="2"/>
+<rect x="816" y="323" width="344" height="272" rx="20" fill="#FFFFFF" stroke="#DCE4EB"/>
+<rect x="840" y="349" width="44" height="5" rx="2" fill="#56688A" stroke="none"/>
+<text x="840" y="393" font-size="17" fill="#56688A" font-weight="700" letter-spacing="1.4" data-maxx="1146">03 / RECOMMEND</text>
+<text x="840" y="441" font-size="28" fill="#172C3C" font-weight="600" data-maxx="1146">Collaborative filtering</text>
+<text x="840" y="485" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="1146">User-CF: Pearson, cosine</text>
+<text x="840" y="517" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="1146">Item-CF: similarity matrix</text>
+<text x="840" y="549" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="1146">Most-viewed fallback</text>
+<path d="M1168 458h16m-6-6 6 6-6 6" fill="none" stroke="#56688A" stroke-width="2"/>
+<rect x="1192" y="323" width="344" height="272" rx="20" fill="#FFFFFF" stroke="#DCE4EB"/>
+<rect x="1216" y="349" width="44" height="5" rx="2" fill="#56688A" stroke="none"/>
+<text x="1216" y="393" font-size="17" fill="#56688A" font-weight="700" letter-spacing="1.4" data-maxx="1522">04 / MANAGE</text>
+<text x="1216" y="441" font-size="28" fill="#172C3C" font-weight="600" data-maxx="1522">Admin and extras</text>
+<text x="1216" y="485" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="1522">Django admin back end</text>
+<text x="1216" y="517" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="1522">Review word clouds</text>
+<text x="1216" y="549" font-size="18" fill="#5C6D7B" font-weight="400" data-maxx="1522">REST API endpoints</text>
+<rect x="64" y="635" width="470" height="211" rx="18" fill="#E3E8F1" stroke="none"/>
+<text x="88" y="675" font-size="15" fill="#56688A" font-weight="700" letter-spacing="1.2" data-maxx="516">FALLBACK</text>
+<text x="88" y="722" font-size="24" fill="#193346" font-weight="600" data-maxx="516">Never an empty list</text>
+<text x="88" y="765" font-size="18" fill="#536777" font-weight="400" data-maxx="516">Under 15 picks? The rest are filled with</text>
+<text x="88" y="795" font-size="18" fill="#536777" font-weight="400" data-maxx="516">the most-viewed unrated movies.</text>
+<rect x="565" y="635" width="470" height="211" rx="18" fill="#E8EDF3" stroke="none"/>
+<text x="589" y="675" font-size="15" fill="#56688A" font-weight="700" letter-spacing="1.2" data-maxx="1017">STACK</text>
+<text x="589" y="722" font-size="24" fill="#193346" font-weight="600" data-maxx="1017">Django + SQLite</text>
+<text x="589" y="765" font-size="18" fill="#536777" font-weight="400" data-maxx="1017">Bootstrap 3 front end, a DRF API,</text>
+<text x="589" y="795" font-size="18" fill="#536777" font-weight="400" data-maxx="1017">one command to run locally.</text>
+<rect x="1066" y="635" width="470" height="211" rx="18" fill="#E8EDF3" stroke="none"/>
+<text x="1090" y="675" font-size="15" fill="#56688A" font-weight="700" letter-spacing="1.2" data-maxx="1518">DEMO</text>
+<text x="1090" y="722" font-size="24" fill="#193346" font-weight="600" data-maxx="1518">Recorded walkthroughs</text>
+<text x="1090" y="765" font-size="18" fill="#536777" font-weight="400" data-maxx="1518">Screen recordings and slides</text>
+<text x="1090" y="795" font-size="18" fill="#536777" font-weight="400" data-maxx="1518">are in the repository.</text>
+<path d="M64 888h1472" stroke="#CED9E3"/>
+<text x="64" y="923" font-size="17" fill="#647788" font-weight="400" data-maxx="1536">PYTHON / DJANGO  /  pip install -r requirements.txt, then python manage.py runserver.</text>
+</g></svg>
