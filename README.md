@@ -1,4 +1,45 @@
-# Movie-Recommendation-System
+<div align="center">
+
+# Movie Recommendation System
+
+**A Django movie site with user- and item-based collaborative filtering · 基于 Django 和协同过滤的电影推荐系统**
+
+![Python](https://img.shields.io/badge/Python-Django-092E20?logo=django&logoColor=white)
+![database](https://img.shields.io/badge/database-SQLite-003B57?logo=sqlite&logoColor=white)
+[![homepage](https://img.shields.io/badge/homepage-ccao2679.com-555555)](https://www.ccao2679.com/coursework/#movie-recommendation-system)
+
+<img src="docs/figures/overview.png" alt="Overview poster: crawl Douban data, rate and search, user- and item-based collaborative filtering, admin and word clouds" width="100%">
+
+</div>
+
+## Highlights
+
+- **Recommendations:** user-based CF (Pearson or cosine similarity between users) and item-based CF (an item similarity matrix), with a most-viewed fallback so a user never gets fewer than 15 picks.
+- **Site:** sign-up and login, search by title, director or description, browse by tag, rate, comment and save favourites; Django admin for management; word clouds from reviews.
+- **Data:** movies, tags and reviews crawled from Douban into CSV and loaded into SQLite.
+
+## Quick start
+
+```bash
+pip install -r requirements.txt
+python manage.py runserver        # http://127.0.0.1:8000/  ·  admin at /admin
+python manage.py createsuperuser  # optional, for the admin back end
+```
+
+## Repository layout
+
+| Path | Purpose |
+|---|---|
+| `recommend_movies.py` | Collaborative filtering: `recommend_by_user_id` (user-CF), `recommend_by_item_id` (item-CF) |
+| `movie/`, `user/` | Django apps for movies and accounts |
+| `api/` | REST API (Django REST framework) |
+| `crawler/` | Douban crawler and image download |
+| `comment/`, `csv_data/`, `populate_data/` | Crawled reviews and data loaders |
+| `genrate_cloud.py` | Review word clouds |
+| `docs/` | Senior-project slides and recorded walkthroughs |
+
+<details>
+<summary>原始文档（中文）</summary>
 
 基于django和协同过滤的电影推荐系统
 
@@ -299,3 +340,5 @@ recommend_movies.py
 https://github.com/Colaplusice/movie1_recommend
 
 https://github.com/Colaplusice/movie_recommend
+
+</details>
