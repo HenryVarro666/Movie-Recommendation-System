@@ -1,4 +1,24 @@
-# Movie-Recommendation-System
+# Movie Recommendation System
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/overview-dark.svg">
+    <img src="docs/overview-light.svg" alt="Overview: a user-movie rating matrix with missing ratings is completed by collaborative filtering into a ranked list" width="560">
+  </picture>
+</p>
+
+A Django movie site with **user-based and item-based collaborative filtering** (Pearson and cosine
+similarity) over ratings and reviews crawled from Douban. Users can search, rate, comment and save
+favourites; recommendations fall back to the most-viewed unrated films when there are too few
+similar users. Includes an admin back end and review word clouds. Built as a senior project
+(Django + SQLite + Bootstrap 3).
+
+- Recommendation code: `recommend_movies.py` (`recommend_by_user_id` for user-CF, `recommend_by_item_id` for item-CF)
+- Run: `pip install -r requirements.txt && python manage.py runserver` → <http://127.0.0.1:8000/>
+
+The original Chinese documentation follows.
+
+---
 
 基于django和协同过滤的电影推荐系统
 
