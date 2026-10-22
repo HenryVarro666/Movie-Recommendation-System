@@ -10,7 +10,7 @@
 ![database](https://img.shields.io/badge/database-SQLite-003B57?logo=sqlite&logoColor=white)
 [![homepage](https://img.shields.io/badge/homepage-ccao2679.com-555555)](https://www.ccao2679.com/projects/#movie-recommendation-system)
 
-<img src="docs/figures/overview.png" alt="Overview poster: crawl Douban data, rate and search, user- and item-based collaborative filtering, admin and word clouds" width="100%">
+<img src="docs/figures/overview.png" alt="Overview poster: crawl Douban data, seed random ratings, user- and item-based collaborative filtering, site and admin" width="100%">
 
 </div>
 
@@ -30,9 +30,9 @@
 
 ## Highlights
 
-- **Recommendations:** user-based CF (Pearson or cosine similarity between users) and item-based CF (an item similarity matrix), with a most-viewed fallback so a user never gets fewer than 15 picks.
+- **Recommendations:** user-based CF (Pearson correlation, 15 nearest users; when it finds fewer than 15 movies it tops up with the most-viewed unrated ones) and item-based CF (co-rating similarity computed per request for 30 random unrated movies from the user's three top tags). Users with no ratings get movies from their chosen tags or the most-viewed list.
 - **Site:** sign-up and login, search by title, director or description, browse by tag, rate, comment and save favourites; Django admin for management; word clouds from reviews.
-- **Data:** movies, tags and reviews crawled from Douban into CSV and loaded into SQLite.
+- **Data:** movie details, tags and reviews crawled from Douban into CSV and loaded into SQLite. The ratings in the bundled `db.sqlite3` are synthetic: `populate_user_rate.py` created 400 random accounts with 2,200 random 1–5 ratings (2,201 ratings from 401 users in total).
 
 ## Architecture
 
@@ -78,12 +78,20 @@ python manage.py createsuperuser  # optional, for the admin back end
 | Path | Purpose |
 |---|---|
 | `recommend_movies.py` | Collaborative filtering: `recommend_by_user_id` (user-CF), `recommend_by_item_id` (item-CF) |
-| `movie/`, `user/` | Django apps for movies and accounts |
+| `movie/` | Django project package: settings, URL routing, WSGI |
+| `user/` | Main Django app: models (`Movie`, `Rate`, `Tags`, …), page views and templates |
 | `api/` | REST API (Django REST framework) |
 | `crawler/` | Douban crawler and image download |
 | `comment/`, `csv_data/`, `populate_data/` | Crawled reviews and data loaders |
 | `genrate_cloud.py` | Review word clouds |
 | `docs/` | Senior-project slides and recorded walkthroughs |
+
+## Known limitations
+
+- Item-CF does not top up to 15 picks, so it returns fewer when the user's top tags have few unrated movies.
+- Item-CF scores each candidate against a single rated movie (the first one returned): the `names` check in `recommend_by_item_id` skips the others.
+- `api/views.py` caches the user-CF and item-CF lists under the same key (`USER_CACHE`), so for 5 minutes one list can be served in place of the other.
+- The `ItemBasedCF` similarity matrix (`item_rec.pkl`) is rebuilt when `runserver` starts and updated after each rating, but no endpoint uses it to serve recommendations.
 
 <details>
 <summary>原始文档（中文）</summary>

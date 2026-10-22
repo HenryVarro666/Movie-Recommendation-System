@@ -10,7 +10,7 @@
 ![database](https://img.shields.io/badge/database-SQLite-003B57?logo=sqlite&logoColor=white)
 [![homepage](https://img.shields.io/badge/homepage-ccao2679.com-555555)](https://www.ccao2679.com/projects/#movie-recommendation-system)
 
-<img src="docs/figures/overview.png" alt="项目概览海报：爬取豆瓣数据、评分与搜索、基于用户和基于物品的协同过滤、后台管理与词云" width="100%">
+<img src="docs/figures/overview.png" alt="项目概览海报：爬取豆瓣数据、随机生成评分、基于用户和基于物品的协同过滤、网站与后台" width="100%">
 
 </div>
 
@@ -30,9 +30,9 @@
 
 ## 亮点
 
-- **推荐：** 基于用户的协同过滤（用户之间的 Pearson 相关系数或余弦相似度）与基于物品的协同过滤（物品相似度矩阵），并以浏览量最高的电影兜底，保证每位用户至少拿到 15 条推荐。
+- **推荐：** 基于用户的协同过滤（Pearson 相关系数，取最相似的 15 个用户；找到的电影不足 15 部时，用该用户未评分、浏览量最高的电影补齐）与基于物品的协同过滤（每次请求时从用户最偏好的 3 个标签中随机抽取 30 部未评分电影，现场计算共同评分相似度）。没有评分的用户会拿到所选标签下的电影或浏览量最高的电影。
 - **网站：** 注册与登录，按片名、导演或简介搜索，按标签浏览，评分、评论和收藏；用 Django admin 做后台管理；根据影评生成词云。
-- **数据：** 从豆瓣爬取电影、标签和影评，存成 CSV 后导入 SQLite。
+- **数据：** 电影信息、标签和影评从豆瓣爬取，存成 CSV 后导入 SQLite。仓库自带的 `db.sqlite3` 中的评分是随机生成的：`populate_user_rate.py` 创建了 400 个随机账户，共 2,200 条 1–5 分的随机评分（合计 401 个用户、2,201 条评分）。
 
 ## 架构
 
@@ -78,12 +78,20 @@ python manage.py createsuperuser  # optional, for the admin back end
 | 路径 | 用途 |
 |---|---|
 | `recommend_movies.py` | 协同过滤：`recommend_by_user_id`（user-CF）、`recommend_by_item_id`（item-CF） |
-| `movie/`, `user/` | 电影和账户相关的 Django 应用 |
+| `movie/` | Django 项目包：配置、URL 路由、WSGI |
+| `user/` | 主 Django 应用：数据模型（`Movie`、`Rate`、`Tags` 等）、页面视图和模板 |
 | `api/` | REST API（Django REST framework） |
 | `crawler/` | 豆瓣爬虫与图片下载 |
 | `comment/`, `csv_data/`, `populate_data/` | 爬取的影评与数据导入脚本 |
 | `genrate_cloud.py` | 影评词云 |
 | `docs/` | 毕业设计答辩幻灯片与操作录屏 |
+
+## 已知局限
+
+- item-CF 不会补齐到 15 部；用户偏好标签下未评分的电影不多时，返回的推荐会少于 15 部。
+- item-CF 只用一部已评分电影（查询返回的第一部）给每个候选打分：`recommend_by_item_id` 中的 `names` 判断会跳过其余已评分电影。
+- `api/views.py` 用同一个键（`USER_CACHE`）缓存 user-CF 和 item-CF 的结果，因此 5 分钟内可能把一种列表当作另一种返回。
+- `ItemBasedCF` 相似度矩阵（`item_rec.pkl`）在 `runserver` 启动时重建、每次评分后更新，但没有任何接口用它生成推荐。
 
 <details>
 <summary>原始文档（中文）</summary>
