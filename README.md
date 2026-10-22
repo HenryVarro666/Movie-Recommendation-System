@@ -6,7 +6,7 @@
 
 ![Python](https://img.shields.io/badge/Python-Django-092E20?logo=django&logoColor=white)
 ![database](https://img.shields.io/badge/database-SQLite-003B57?logo=sqlite&logoColor=white)
-[![homepage](https://img.shields.io/badge/homepage-ccao2679.com-555555)](https://www.ccao2679.com/coursework/#movie-recommendation-system)
+[![homepage](https://img.shields.io/badge/homepage-ccao2679.com-555555)](https://www.ccao2679.com/projects/#movie-recommendation-system)
 
 <img src="docs/figures/overview.png" alt="Overview poster: crawl Douban data, rate and search, user- and item-based collaborative filtering, admin and word clouds" width="100%">
 
