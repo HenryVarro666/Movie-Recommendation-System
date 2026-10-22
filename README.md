@@ -2,6 +2,8 @@
 
 # Movie Recommendation System
 
+**English** · [简体中文](README.zh-CN.md)
+
 **A Django movie site with user- and item-based collaborative filtering · 基于 Django 和协同过滤的电影推荐系统**
 
 ![Python](https://img.shields.io/badge/Python-Django-092E20?logo=django&logoColor=white)
@@ -31,6 +33,37 @@
 - **Recommendations:** user-based CF (Pearson or cosine similarity between users) and item-based CF (an item similarity matrix), with a most-viewed fallback so a user never gets fewer than 15 picks.
 - **Site:** sign-up and login, search by title, director or description, browse by tag, rate, comment and save favourites; Django admin for management; word clouds from reviews.
 - **Data:** movies, tags and reviews crawled from Douban into CSV and loaded into SQLite.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    subgraph load["Data loading"]
+        CR["crawler/, csv_data/<br/>Douban movie CSVs"] --> POP["populate_movies.py"]
+        SEED["populate_user_rate.py<br/>random ratings"]
+    end
+    POP --> DB[("db.sqlite3<br/>Movie, Rate, Tags")]
+    SEED --> DB
+    DB <-->|"read, new ratings"| PAGES["user/views.py<br/>browse, search, rate"]
+    subgraph rec["recommend_movies.py"]
+        COLD{"user has ratings?"}
+        UCF["user-CF<br/>Pearson, top 15 users"]
+        ICF["item-CF<br/>co-rating similarity"]
+        FB["fallback<br/>tags or most viewed"]
+    end
+    DB --> COLD
+    COLD -->|"no"| FB
+    COLD -->|"yes"| UCF
+    COLD -->|"yes"| ICF
+    UCF -->|"fewer than 15"| FB
+    UCF --> API["api/views.py<br/>JSON, cached 5 min"]
+    ICF --> API
+    FB --> API
+    API --> UI["templates<br/>Vue + axios"]
+    PAGES -->|"render"| UI
+```
+
+Arrows follow the data: ratings in `db.sqlite3` feed the recommenders, whose lists reach the page through the JSON endpoints in `api/views.py` (cached per user for 5 minutes). Users with no ratings get movies from their chosen tags or the most-viewed list, and user-CF tops up with the most-viewed unrated movies when it finds fewer than 15.
 
 ## Quick start
 
