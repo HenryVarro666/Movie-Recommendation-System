@@ -1,13 +1,15 @@
-# 问题与验收
+# Problem and acceptance
 
-> **在稀疏评分下，协同过滤能否比热门电影排序更好地推荐用户尚未评分的电影，同时保持新用户的可用覆盖？**
+> **With sparse ratings, can collaborative filtering recommend movies a user has not yet rated better than a popularity ranking, while keeping usable coverage for new users?**
 
-**为什么值得解决：** 有推荐页面不等于推荐有用。系统需要证明个性化信号能改善排序，并在评分不足时提供明确的回退行为。
+**Why it matters:** A recommendation page is not the same as useful recommendations. The system has to show that the personalised signal improves the ranking, and that it falls back explicitly when there are too few ratings.
 
-**核心矛盾：** 更严格的相似用户筛选可能提高相关性，却缩小候选集合；热门回退提高覆盖，也可能掩盖个性化模块没有贡献。
+**Central tension:** Stricter filtering of similar users may raise relevance but shrinks the candidate set; the popularity fallback raises coverage but can also hide that the personalised part contributes nothing.
 
-**已有证据与缺口：** [README.md](README.md) 说明 Django 服务、user/item 协同过滤、热门回退及参考代码来源。这些构成工程实现说明，尚不能替代离线推荐质量对照。
+**Current evidence and gap:** [README.md](README.md) describes the Django service, user- and item-based collaborative filtering, the popularity fallback and where the reference code came from. That documents the engineering; it does not replace an offline comparison of recommendation quality.
 
-**最小决定性验收：** 按用户保留测试评分；有可靠时间戳时采用时间划分。固定候选集合，对比热门、user-CF 与 item-CF，报告 Recall/NDCG、覆盖率及冷启动分组结果，单独标记回退命中。训练过程不能看到保留评分。若收益仅出现在高活跃用户，应限制适用范围并保留热门基线。
+**Smallest decisive acceptance test:** Hold out test ratings per user, and split by time when reliable timestamps exist. Fix the candidate set and compare popularity, user-CF and item-CF, reporting Recall/NDCG, coverage and cold-start groups, with fallback hits marked separately. Training must never see the held-out ratings. If the gains appear only for highly active users, restrict the claimed scope and keep the popularity baseline.
 
-以上为拟议验收，不宣称原创推荐算法或新增用户效果。
+This is a proposed acceptance test; it claims no original recommendation algorithm and no new user outcomes.
+
+中文版：[PROBLEM.zh.md](PROBLEM.zh.md)

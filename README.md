@@ -14,15 +14,15 @@
 
 <!-- problem-framing:start -->
 
-## 问题与验证
+## Problem and evidence
 
-> **在稀疏评分下，协同过滤能否比热门电影排序更好地推荐用户尚未评分的电影，同时保持新用户的可用覆盖？**
+> **With sparse ratings, can collaborative filtering recommend movies a user has not yet rated better than a popularity ranking, while keeping usable coverage for new users?**
 
-**为什么值得解决：** 有推荐页面不等于推荐有用。系统需要证明个性化信号能改善排序，并在评分不足时提供明确的回退行为。
+**Why it matters:** A recommendation page is not the same as useful recommendations. The system has to show that the personalised signal improves the ranking, and that it falls back explicitly when there are too few ratings.
 
-**核心矛盾：** 更严格的相似用户筛选可能提高相关性，却缩小候选集合；热门回退提高覆盖，也可能掩盖个性化模块没有贡献。
+**Central tension:** Stricter filtering of similar users may raise relevance but shrinks the candidate set; the popularity fallback raises coverage but can also hide that the personalised part contributes nothing.
 
-[完整问题与验证方案](PROBLEM.md)
+[Full problem and verification plan](PROBLEM.md) · [中文](PROBLEM.zh.md)
 
 <!-- problem-framing:end -->
 
