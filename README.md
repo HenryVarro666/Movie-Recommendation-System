@@ -63,7 +63,192 @@ flowchart TD
     PAGES -->|"render"| UI
 ```
 
-Arrows follow the data: ratings in `db.sqlite3` feed the recommenders, whose lists reach the page through the JSON endpoints in `api/views.py` (cached per user for 5 minutes). Users with no ratings get movies from their chosen tags or the most-viewed list, and user-CF tops up with the most-viewed unrated movies when it finds fewer than 15.
+Arrows follow the data: ratings in `db.sqlite3` feed the recommenders, whose lists reach the page through the JSON endpoints in `api/views.py`. How each list is computed is in [Recommendation algorithm](#recommendation-algorithm); how the code is split into packages and models is in [Project structure](#project-structure).
+
+## Recommendation algorithm
+
+Both recommenders are in `recommend_movies.py` and reach the page through two endpoints in `api/views.py`: `/api/user_recommend/<user_id>` (user-CF, right-hand sidebar, 5 shown) and `/api/item_recommend/<user_id>` (item-CF, carousel on movie pages, 10 shown). Each returns up to 15 movies in random order; without a user id (logged out), both return every movie in random order.
+
+```mermaid
+flowchart TD
+    REQ["request with user id"] --> HIT{"in cache?"}
+    HIT -->|"yes"| OUT
+    HIT -->|"no"| R{"user has ratings?"}
+    R -->|"no"| T{"chose tags?"}
+    T -->|"yes"| FT["first 15 movies<br/>with preferred tags"]
+    T -->|"no"| FV["15 most viewed"]
+    R -->|"yes · user endpoint"| U["user-CF<br/>15 Pearson neighbours"]
+    R -->|"yes · item endpoint"| I["item-CF<br/>30 random unrated movies<br/>from top-3 tags"]
+    U --> N{"fewer than 15?"}
+    N -->|"yes"| TOP["add most viewed<br/>unrated movies"]
+    N -->|"no"| SAVE
+    TOP --> SAVE
+    I -->|"15 best scores"| SAVE
+    FT --> SAVE
+    FV --> SAVE
+    SAVE["cache 5 min"] --> OUT["shuffle, return ≤ 15"]
+```
+
+### User-based CF
+
+`recommend_by_user_id(user_id)`
+
+**Rating table.** At start-up, `get_all_user()` loads every rating into memory as `{username: {movie_id: mark}}`. After a new rating, `update_all_user` adds the user if they are not in it yet; existing entries are not refreshed (`setdefault`).
+
+**Similarity.** `UserCf.pearson` compares the target user $`u`$ with every other user $`v`$ over $`I_{uv}`$, the movies both have rated, with $`n = \lvert I_{uv} \rvert`$ and marks $`x_i`$ (from $`u`$) and $`y_i`$ (from $`v`$). All sums run over $`I_{uv}`$:
+
+$$
+r_{uv}=\frac{\sum x_i y_i-\frac{1}{n}\sum x_i\sum y_i}{\sqrt{\left(\sum x_i^2-\frac{1}{n}\left(\sum x_i\right)^2\right)\left(\sum y_i^2-\frac{1}{n}\left(\sum y_i\right)^2\right)}}
+$$
+
+This is Pearson's correlation with the means taken over the shared movies only. It is 0 when the two users share no movie or the denominator is 0 (a single shared movie, or one side gave every shared movie the same mark).
+
+**Neighbours.** All other users are sorted by $`r_{uv}`$ and the top 15 are kept. There is no threshold: users with zero or negative correlation become neighbours when there are not enough positive ones, and ties keep database order.
+
+**Scoring.** The neighbours are read from most to least similar. Each movie a neighbour rated and $`u`$ has not becomes a candidate, scored with that neighbour's mark; later neighbours do not change the score. The similarity therefore decides the order in which neighbours are read but is not a weight: the similarity-weighted prediction in the original notes is not implemented. `UserCf.recommend` returns all candidates sorted by score.
+
+**Top 15.** `recommend_by_user_id` then loads the candidate ids with `Movie.objects.filter(id__in=…)`, which returns rows in database order, not score order, keeps the first 15 and shuffles them. If there are fewer than 15, it appends the user's unrated movies with the most views (`Movie.num`) until there are 15.
+
+### Item-based CF
+
+`recommend_by_item_id(user_id)` computes similarities on every request instead of reading a stored matrix.
+
+**Candidates.** The user's top 3 tags by `UserTagPrefer.score`: choosing a tag after sign-up gives it 5, and a new rating gives each of the movie's tags the mark if the user has no score for that tag yet, and otherwise adds mark − 3. Up to 30 movies carrying any of these tags that the user has not rated are drawn at random (`order_by('?')`). A user with no tag preferences gets no candidates and an empty list.
+
+**Similarity.** With $`N(i)`$ the set of users who rated movie $`i`$, `similarity()` counts raters with three queries per pair:
+
+$$
+w_{ij}=\frac{\lvert N(i)\cap N(j)\rvert}{\sqrt{\lvert N(i)\rvert\cdot\lvert N(j)\rvert}}
+$$
+
+**Scoring.** The loop runs over candidates × rated movies, but the `names` check records each candidate only once, so every candidate $`j`$ is scored against the first rated movie $`m`$ the query returns: $`s_j = w_{jm}\, r_{um}`$. Because $`r_{um}`$ is the same for every candidate, the order is the similarity to that one movie. The 15 highest scores are kept, with no top-up.
+
+**Precomputed matrix, unused.** `ItemBasedCF` computes the same $`w_{ij}`$ over the whole rating table when `runserver` starts, saves it to `item_rec.pkl` and updates it after every new rating (`update_item_movie_sim_matrix`). Its `recommend()` method, which sums $`w_{ij}\, r_{ui}`$ over the 100 most similar movies of each rated one, is never called, so the matrix does not affect what is served.
+
+### Cold start and caching
+
+**Fallback.** Both endpoints fall back only when the user has no ratings at all. They return the first 15 movies (database order) carrying any of the user's preferred tags (all of them for user-CF, the top 3 for item-CF) or, if the user never chose tags, the 15 most-viewed movies. Apart from this, popularity is used only by the user-CF top-up.
+
+**Cache.** Each list is cached for 5 minutes in Django's file-based cache (`/var/tmp/django_cache`) under the key `{user_id}_user_cached`. Both endpoints read and write this same key (`USER_CACHE`), so for 5 minutes either can return the list the other computed, and a movie page requests both at once. A new rating deletes the user's cache keys; `/clear_cache/` empties the whole cache.
+
+### Worked example
+
+Made-up ratings for three users and four movies; Alice is the target user and – means not rated.
+
+| | M1 | M2 | M3 | M4 |
+|---|:-:|:-:|:-:|:-:|
+| Alice | 5 | 2 | – | – |
+| Bob | 4 | 1 | 2 | – |
+| Carol | 1 | 4 | 5 | 4 |
+
+Alice shares M1 and M2 with both others, so $`n = 2`$ and $`x = (5, 2)`$, with $`\sum x_i = 7`$ and $`\sum x_i^2 = 29`$. Bob's marks are $`y = (4, 1)`$: $`\sum y_i = 5`$, $`\sum y_i^2 = 17`$ and $`\sum x_i y_i = 22`$.
+
+$$
+r_{AB}=\frac{22-\frac{7\cdot 5}{2}}{\sqrt{\left(29-\frac{7^2}{2}\right)\left(17-\frac{5^2}{2}\right)}}=\frac{4.5}{\sqrt{4.5\cdot 4.5}}=1
+$$
+
+Carol's marks are $`y = (1, 4)`$: the same $`\sum y_i = 5`$ and $`\sum y_i^2 = 17`$, but $`\sum x_i y_i = 13`$, so the numerator is $`13 - 17.5 = -4.5`$ and $`r_{AC} = -1`$. With only two shared movies, the correlation can only be 1, −1 or 0.
+
+| Step | Result |
+|---|---|
+| Neighbours by $`r`$ | Bob (1), then Carol (−1); both kept |
+| Read Bob | M3 scores 2 |
+| Read Carol | M3 is already scored, so her 5 is ignored; M4 scores 4 |
+| Ranking | M4 (4), then M3 (2) |
+
+M4 comes first only because Carol, whose taste is opposite to Alice's, liked it, while M3 keeps the low mark of Bob, whose taste matches hers. Both movies are within the 15-movie cut and no other unrated movie is left to top up with, so Alice gets M3 and M4 in random order.
+
+### On the bundled data
+
+Running both functions for the 401 users with ratings in the bundled `db.sqlite3` (most have 5 random ratings among 2,181 movies): 389 users have no neighbour with positive similarity, so their 15 neighbours are just the first users in database order with similarity 0; 358 users get the same 15 user-CF movies; and item-CF returns an empty list for 400 users, because the seeded accounts have no tag preferences.
+
+## Project structure
+
+```mermaid
+flowchart TD
+    subgraph proj["movie/ · Django project"]
+        URLS["urls.py<br/>/ · /api/ · /admin/"]
+        SET["settings.py<br/>SQLite, file cache"]
+    end
+    subgraph app["user/ · main app"]
+        UV["views.py, forms.py<br/>pages, search, rating"]
+        ADM["admin.py<br/>registers all models"]
+        TPL["templates/<br/>pages + Vue widgets"]
+        UM["models.py<br/>7 models, below"]
+    end
+    subgraph apiapp["api/"]
+        AV["views.py, serializers.py<br/>JSON endpoints"]
+    end
+    REC["recommend_movies.py<br/>user-CF, item-CF"]
+    ST["static/, media/<br/>Vue, axios, CSS<br/>covers, word clouds"]
+    PKL[("item_rec.pkl")]
+    DB[("db.sqlite3")]
+    subgraph offline["offline scripts"]
+        CRW["crawler/<br/>Douban → csv_data/, comment/"]
+        POPD["populate_data/<br/>movies, random ratings"]
+        WC["genrate_cloud.py"]
+    end
+    URLS -->|"/"| UV
+    URLS -->|"/admin/"| ADM
+    URLS -->|"/api/"| AV
+    UV -->|"renders"| TPL
+    TPL -->|"axios"| AV
+    TPL --> ST
+    AV --> REC
+    UV --> UM
+    AV --> UM
+    REC --> UM
+    REC --> PKL
+    UV -.->|"new rating"| REC
+    UM --> DB
+    SET -.-> DB
+    CRW --> POPD --> DB
+    WC --> ST
+```
+
+`movie/urls.py` routes `/` to the page views in `user/views.py`, `/api/` to `api/views.py` and `/admin/` to the Django admin, where `user/admin.py` registers every model. Pages extend `user/templates/base.html`, whose Vue widgets (Vue and axios are served from `static/js/`) fetch recommendations from `/api/`. After a new rating, `user/views.py` deletes the user's cache keys and calls into `recommend_movies.py` to update the item matrix and the in-memory ratings. `populate_data/` loads the crawled CSVs into `db.sqlite3` and seeds the random ratings; `genrate_cloud.py` turns the reviews in `comment/` into word clouds in `media/comment/`. `docs/` holds the senior-project slides and recorded walkthroughs.
+
+```mermaid
+erDiagram
+    User |o--o{ Rate : gives
+    Movie |o--o{ Rate : receives
+    User ||--o{ UserTagPrefer : has
+    Tags ||--o{ UserTagPrefer : "scored in"
+    Movie }o--o{ Tags : "tags (M2M)"
+    Movie }o--o{ User : "collect (M2M)"
+    User ||--o{ Comment : writes
+    Movie ||--o{ Comment : has
+    Comment ||--o{ LikeComment : receives
+    User ||--o{ LikeComment : gives
+    User {
+        string username UK
+        string password
+        string email
+    }
+    Movie {
+        string name UK
+        string director
+        date years
+        int num "view count"
+        string d_rate "Douban rating"
+    }
+    Tags {
+        string name UK
+    }
+    Rate {
+        float mark
+        datetime create_time
+    }
+    UserTagPrefer {
+        float score
+    }
+    Comment {
+        string content
+        datetime create_time
+    }
+```
+
+`User` is the app's own model, not `django.contrib.auth`. Both recommenders read `Rate`; `UserTagPrefer` holds the tag scores behind the cold-start fallback and item-CF's candidate tags; `Movie.num` (views) drives the most-viewed fallback and top-up; `Movie.collect` stores favourites.
 
 ## Quick start
 
@@ -73,22 +258,13 @@ python manage.py runserver        # http://127.0.0.1:8000/  ·  admin at /admin
 python manage.py createsuperuser  # optional, for the admin back end
 ```
 
-## Repository layout
-
-| Path | Purpose |
-|---|---|
-| `recommend_movies.py` | Collaborative filtering: `recommend_by_user_id` (user-CF), `recommend_by_item_id` (item-CF) |
-| `movie/` | Django project package: settings, URL routing, WSGI |
-| `user/` | Main Django app: models (`Movie`, `Rate`, `Tags`, …), page views and templates |
-| `api/` | REST API (Django REST framework) |
-| `crawler/` | Douban crawler and image download |
-| `comment/`, `csv_data/`, `populate_data/` | Crawled reviews and data loaders |
-| `genrate_cloud.py` | Review word clouds |
-| `docs/` | Senior-project slides and recorded walkthroughs |
-
 ## Known limitations
 
+- User-CF ignores its own ranking: the candidates are reloaded with `filter(id__in=…)` and cut to the first 15 in database order, so the score has no effect whenever there are more than 15 candidates, which is the case for every user in the bundled data.
+- User-CF scores a candidate with one neighbour's raw mark rather than a similarity-weighted average, and keeps neighbours with zero or negative similarity.
+- The in-memory rating table only gains users that are missing from it (`update_all_user` uses `setdefault`), so user-CF ignores later ratings until a restart and can recommend a movie the user rated after start-up.
 - Item-CF does not top up to 15 picks, so it returns fewer when the user's top tags have few unrated movies.
+- Item-CF does not fall back once a user has ratings: without tag preferences (true of every seeded account) it returns an empty list.
 - Item-CF scores each candidate against a single rated movie (the first one returned): the `names` check in `recommend_by_item_id` skips the others.
 - `api/views.py` caches the user-CF and item-CF lists under the same key (`USER_CACHE`), so for 5 minutes one list can be served in place of the other.
 - The `ItemBasedCF` similarity matrix (`item_rec.pkl`) is rebuilt when `runserver` starts and updated after each rating, but no endpoint uses it to serve recommendations.
